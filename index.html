@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3b91" />
+  <meta name="description" content="Tabela da Copa do Mundo 2026 com grupos, jogos, resultados manuais e estatísticas." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>Tabela Copa 2026</title>
+  <!-- versão visual com calendário: 2.0 -->
+  <style>
+    :root {
+      --bg: #07111f;
+      --card: #0e1c30;
+      --card2: #122641;
+      --line: rgba(255,255,255,.12);
+      --text: #f8fbff;
+      --muted: #aebbd0;
+      --accent: #2bd4a7;
+      --accent2: #ffcf33;
+      --danger: #ff6b6b;
+      --blue: #2d7ff9;
+      --shadow: 0 16px 40px rgba(0,0,0,.28);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(43,212,167,.18), transparent 28%),
+        radial-gradient(circle at 85% 4%, rgba(45,127,249,.22), transparent 28%),
+        linear-gradient(180deg, #07111f, #091524 55%, #050914);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 20px clamp(14px, 4vw, 42px) 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(12px);
+      background: rgba(7, 17, 31, .78);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .ball {
+      width: 46px; height: 46px; border-radius: 16px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #f8fbff, #c9e6ff);
+      color: #0b3b91;
+      font-size: 25px;
+      box-shadow: var(--shadow);
+    }
+    h1 { margin: 0; font-size: clamp(19px, 3vw, 32px); line-height: 1.05; }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .installArea { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    main { max-width: 1320px; margin: 0 auto; padding: 18px clamp(14px, 4vw, 42px) 44px; }
+    .tabs {
+      display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 14px; scrollbar-width: thin;
+    }
+    .tab {
+      border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--text);
+      padding: 10px 13px; border-radius: 999px; cursor: pointer; white-space: nowrap; font-weight: 800;
+    }
+    .tab.active { background: linear-gradient(135deg, var(--accent), var(--blue)); color: #04101e; border-color: transparent; }
+    .panel { display: none; }
+    .panel.active { display: block; animation: fade .18s ease; }
+    @keyframes fade { from {opacity: .35; transform: translateY(4px)} to {opacity: 1; transform: translateY(0)} }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .card {
+      background: rgba(14,28,48,.78); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .kpi .label { color: var(--muted); font-size: 12px; }
+    .kpi .value { font-size: 28px; font-weight: 900; margin-top: 4px; }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 8px 0 14px;
+    }
+    input, select, button { font: inherit; }
+    .search, .select {
+      min-height: 42px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px;
+      background: rgba(255,255,255,.07); color: var(--text); outline: none;
+    }
+    .search { min-width: min(420px, 100%); flex: 1; }
+    option { color: #0c1523; }
+    .btn {
+      border: 0; border-radius: 12px; min-height: 40px; padding: 0 12px; font-weight: 900; cursor: pointer;
+      background: rgba(255,255,255,.1); color: var(--text); border: 1px solid var(--line);
+    }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--blue)); color: #04101e; border: 0; }
+    .btn.warn { background: rgba(255,207,51,.15); color: #fff0a0; }
+    .btn.danger { background: rgba(255,107,107,.14); color: #ffb4b4; }
+    .sectionTitle { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 6px 0 10px; }
+    h2 { margin: 0; font-size: 21px; }
+    .hint { color: var(--muted); font-size: 13px; }
+    .tableWrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(14,28,48,.62); box-shadow: var(--shadow); }
+    table { border-collapse: collapse; width: 100%; min-width: 980px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; vertical-align: middle; }
+    th { background: rgba(255,255,255,.07); font-size: 12px; color: #dbe8ff; position: sticky; top: 0; z-index: 1; }
+    tr:hover td { background: rgba(255,255,255,.035); }
+    .center { text-align: center; }
+    .matchTeams { display:flex; align-items:center; justify-content: space-between; gap: 8px; min-width: 300px; }
+    .team { display:flex; align-items:center; gap: 8px; font-weight: 850; flex: 1; }
+    .team.right { justify-content: flex-end; text-align: right; }
+    .vs { color: var(--accent2); font-weight: 900; }
+    .scoreInput {
+      width: 58px; min-height: 38px; text-align: center; border: 1px solid var(--line); border-radius: 10px;
+      background: rgba(255,255,255,.09); color: var(--text); font-weight: 900;
+    }
+    .groupButtons { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 12px; }
+    .groupBtn {
+      padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,.08); color: var(--text); border: 1px solid var(--line); cursor:pointer; font-weight:900;
+    }
+    .groupBtn.active { background: var(--accent); color: #04101e; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .matchCard { padding: 14px; border-radius: var(--radius); background: rgba(18,38,65,.78); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .matchMeta { color: var(--muted); font-size: 12px; display:flex; justify-content:space-between; gap: 8px; flex-wrap:wrap; margin-bottom: 10px; }
+    .matchLine { display:grid; grid-template-columns: 1fr 70px 22px 70px 1fr; gap: 8px; align-items:center; }
+    .statList { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+    .pill { display:inline-flex; align-items:center; gap:6px; padding: 5px 8px; background: rgba(255,255,255,.08); border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .empty { color: var(--muted); text-align:center; padding: 22px; }
+    .footerNote { margin-top: 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 28px;
+      padding: clamp(18px, 4vw, 34px);
+      background:
+        radial-gradient(circle at 14% 22%, rgba(255,207,51,.20), transparent 26%),
+        radial-gradient(circle at 88% 18%, rgba(43,212,167,.28), transparent 30%),
+        linear-gradient(135deg, rgba(18,38,65,.96), rgba(5,11,24,.96));
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -90px -130px auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      border: 38px solid rgba(255,255,255,.055);
+      pointer-events: none;
+    }
+    .heroContent { position: relative; z-index: 1; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      color: #dff7ff;
+      font-weight: 900;
+      font-size: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .hero h2 { font-size: clamp(28px, 6vw, 56px); line-height: .98; margin: 14px 0 10px; letter-spacing: -1.5px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 760px; font-size: 15px; line-height: 1.55; }
+    .heroActions { display:flex; flex-wrap:wrap; gap: 10px; margin-top: 20px; }
+    .heroBadge {
+      position: relative; z-index: 1;
+      min-width: 190px;
+      align-self: stretch;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 24px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 18px;
+    }
+    .heroCup { font-size: 54px; filter: drop-shadow(0 10px 16px rgba(0,0,0,.25)); }
+    .heroBadgeText { margin-top: 10px; color: var(--muted); line-height: 1.35; }
+    .heroBadgeText b { color: var(--text); }
+    .quickGrid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-top: 14px; }
+    .quickCard {
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+      min-height: 132px;
+      background: rgba(255,255,255,.065);
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .quickCard:hover { transform: translateY(-1px); background: rgba(255,255,255,.09); }
+    .quickCard span { font-size: 26px; display:block; margin-bottom: 10px; }
+    .quickCard b { display:block; font-size: 15px; margin-bottom: 4px; }
+    .quickCard small { color: var(--muted); line-height: 1.35; }
+    .calendarWrap { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; align-items:start; }
+    .calendarMonth {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(14,28,48,.76);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .calendarHead {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(43,212,167,.18), rgba(45,127,249,.15));
+      border-bottom: 1px solid var(--line);
+    }
+    .calendarHead h3 { margin:0; font-size: 18px; }
+    .calendarHead span { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .weekGrid, .daysGrid { display:grid; grid-template-columns: repeat(7, 1fr); }
+    .weekGrid div { padding: 10px 6px; text-align:center; color: #dbe8ff; font-size: 11px; font-weight: 900; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.045); }
+    .dayBlank, .dayCell {
+      min-height: 92px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.025);
+      color: var(--text);
+      padding: 8px;
+      text-align: left;
+    }
+    .dayCell { cursor:pointer; display:flex; flex-direction:column; gap: 6px; }
+    .dayCell:nth-child(7n), .dayBlank:nth-child(7n) { border-right: 0; }
+    .dayCell.hasGames { background: rgba(43,212,167,.075); }
+    .dayCell.hasGames:hover { background: rgba(43,212,167,.13); }
+    .dayCell.selected { outline: 2px solid var(--accent); outline-offset: -2px; background: rgba(43,212,167,.18); }
+    .dayCell.noGames { opacity: .62; cursor: default; }
+    .dayNum { font-weight: 900; font-size: 15px; }
+    .gameBadge {
+      display:inline-flex;
+      width: fit-content;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      color: #04101e;
+      font-size: 11px;
+      font-weight: 1000;
+    }
+    .miniTimes { color: var(--muted); font-size: 11px; line-height: 1.25; }
+    .dayGamesPanel {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(14,28,48,.76);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .dayGamesTitle { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 12px; }
+    .dayGamesTitle h3 { margin:0; font-size: 18px; }
+    .dayGamesTitle .pill { color:#dff7ff; }
+
+    @media (max-width: 940px) {
+      .grid, .statList, .quickGrid { grid-template-columns: repeat(2, 1fr); }
+      .cards { grid-template-columns: 1fr; }
+      .calendarWrap { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .heroBadge { min-width: 0; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .installArea { justify-content: flex-start; }
+      table { min-width: 860px; }
+    }
+    @media (max-width: 560px) {
+      .grid, .statList, .quickGrid { grid-template-columns: 1fr; }
+      .matchLine { grid-template-columns: 1fr 56px 18px 56px 1fr; }
+      .scoreInput { width: 54px; }
+      .dayBlank, .dayCell { min-height: 74px; padding: 6px; }
+      .gameBadge { font-size: 10px; padding: 3px 5px; }
+      .miniTimes { display:none; }
+      .brand { align-items:flex-start; }
+      .ball { width: 40px; height:40px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="ball">⚽</div>
+      <div>
+        <h1>Tabela Copa do Mundo 2026</h1>
+        <p class="subtitle">Tabela interativa com calendário, grupos, resultados manuais e estatísticas</p>
+      </div>
+    </div>
+    <div class="installArea">
+      <button id="installBtn" class="btn primary" style="display:none">Instalar app</button>
+      <button id="exportBtn" class="btn">Exportar resultados</button>
+      <label class="btn" for="importFile">Importar</label>
+      <input id="importFile" type="file" accept="application/json" hidden />
+      <button id="clearBtn" class="btn danger">Limpar resultados</button>
+    </div>
+  </div>
+</header>
+<main>
+  <nav class="tabs" aria-label="Abas do app">
+    <button class="tab active" data-tab="inicio">Início</button>
+    <button class="tab" data-tab="calendario">Calendário</button>
+    <button class="tab" data-tab="grupos">Grupos</button>
+    <button class="tab" data-tab="todos">Todos os jogos</button>
+    <button class="tab" data-tab="mata">Mata-mata</button>
+    <button class="tab" data-tab="stats">Estatísticas</button>
+    <button class="tab" data-tab="instalar">Instalar</button>
+  </nav>
+
+  <section id="inicio" class="panel active">
+    <div class="hero">
+      <div class="heroContent">
+        <span class="eyebrow">⚽ Copa do Mundo 2026</span>
+        <h2>Tabela interativa para acompanhar jogo por jogo</h2>
+        <p>Consulte a agenda por data, acompanhe os grupos, preencha os resultados manualmente e veja as estatísticas atualizarem sozinhas.</p>
+        <div class="heroActions">
+          <button class="btn primary jumpTab" data-target="calendario">Ver calendário</button>
+          <button class="btn jumpTab" data-target="grupos">Ver grupos</button>
+          <button class="btn jumpTab" data-target="todos">Todos os jogos</button>
+        </div>
+      </div>
+      <div class="heroBadge">
+        <div class="heroCup">🏆</div>
+        <div class="heroBadgeText">Junho e Julho<br><b>Agenda completa</b></div>
+      </div>
+    </div>
+
+    <div class="quickGrid">
+      <button class="quickCard jumpTab" data-target="calendario"><span>📅</span><b>Calendário</b><small>Veja quantos jogos tem em cada dia.</small></button>
+      <button class="quickCard jumpTab" data-target="grupos"><span>🌎</span><b>Grupos</b><small>Jogos separados por grupo e classificação.</small></button>
+      <button class="quickCard jumpTab" data-target="todos"><span>📋</span><b>Todos os jogos</b><small>Busca por seleção, fase, cidade ou estádio.</small></button>
+      <button class="quickCard jumpTab" data-target="stats"><span>📊</span><b>Estatísticas</b><small>Gols, médias, linhas e goleadas.</small></button>
+    </div>
+
+    <div class="sectionTitle" style="margin-top:18px">
+      <div>
+        <h2>Primeiros jogos</h2>
+        <div class="hint">Preencha os placares nos campos de gols. Tudo fica salvo neste navegador.</div>
+      </div>
+    </div>
+    <div class="cards" id="nextCards"></div>
+  </section>
+  <section id="calendario" class="panel">
+    <div class="sectionTitle">
+      <div>
+        <h2>Calendário de jogos</h2>
+        <div class="hint">Toque em um dia com jogos para ver os confrontos e horários.</div>
+      </div>
+    </div>
+    <div class="calendarWrap" id="calendarWrap"></div>
+    <div class="dayGamesPanel" id="calendarDayGames"></div>
+  </section>
+
+  <section id="grupos" class="panel">
+    <div class="sectionTitle">
+      <div>
+        <h2>Jogos por grupo</h2>
+        <div class="hint">A classificação é calculada automaticamente pelos resultados digitados.</div>
+      </div>
+    </div>
+    <div class="groupButtons" id="groupButtons"></div>
+    <div id="groupContent"></div>
+  </section>
+
+  <section id="todos" class="panel">
+    <div class="sectionTitle">
+      <div>
+        <h2>Todos os jogos</h2>
+        <div class="hint">Lista completa com jogo, data, dia da semana, horário, estádio e campo de resultado.</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input id="searchAll" class="search" placeholder="Buscar por seleção, cidade, fase ou estádio..." />
+      <select id="phaseFilter" class="select">
+        <option value="">Todas as fases</option>
+      </select>
+      <select id="groupFilter" class="select">
+        <option value="">Todos os grupos</option>
+      </select>
+    </div>
+    <div class="tableWrap"><table id="allTable"></table></div>
+  </section>
+
+  <section id="mata" class="panel">
+    <div class="sectionTitle">
+      <div>
+        <h2>Mata-mata</h2>
+        <div class="hint">Confrontos eliminatórios com resultados manuais.</div>
+      </div>
+    </div>
+    <div class="tableWrap"><table id="knockoutTable"></table></div>
+  </section>
+
+  <section id="stats" class="panel">
+    <div class="sectionTitle">
+      <div>
+        <h2>Estatísticas</h2>
+        <div class="hint">Atualiza automaticamente conforme os placares preenchidos.</div>
+      </div>
+    </div>
+    <div class="grid" id="statsKpis"></div>
+    <div class="sectionTitle" style="margin-top:18px"><h2>Gols acima de linhas</h2></div>
+    <div class="statList" id="goalsLines"></div>
+    <div class="sectionTitle" style="margin-top:18px"><h2>Ranking de gols por seleção</h2></div>
+    <div class="tableWrap"><table id="teamGoalsTable"></table></div>
+    <div class="sectionTitle" style="margin-top:18px"><h2>Goleadas</h2><span class="hint">Goleada = uma seleção marcou 4 gols ou mais</span></div>
+    <div class="tableWrap"><table id="blowoutsTable"></table></div>
+  </section>
+
+  <section id="instalar" class="panel">
+    <div class="card">
+      <h2>Como baixar como app no celular</h2>
+      <p class="hint">Este arquivo já está pronto como PWA. Para aparecer o botão de instalar, normalmente precisa abrir por um link HTTPS, como Vercel, GitHub Pages ou Netlify.</p>
+      <ol>
+        <li>Extraia o arquivo ZIP.</li>
+        <li>Suba a pasta em um serviço como Vercel, GitHub Pages ou Netlify.</li>
+        <li>Abra o link no Chrome/Edge do celular.</li>
+        <li>Toque em <b>Instalar app</b> ou no menu do navegador e escolha <b>Adicionar à tela inicial</b>.</li>
+      </ol>
+      <p class="footerNote">Abrindo direto o arquivo <b>index.html</b>, o app funciona para preencher e consultar, mas a instalação offline pode não aparecer por limitação do navegador em arquivos locais.</p>
+    </div>
+  </section>
+</main>
+<script>
+const GAMES = [{"id":1,"phase":"Fase de Grupos","group":"A","dateISO":"2026-06-11","dateBR":"11/06/2026","weekday":"quinta-feira","time":"16:00","flag1":"🇲🇽","team1":"México","flag2":"🇿🇦","team2":"África do Sul","stadium":"Estadio Banorte","city":"Mexico City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":2,"phase":"Fase de Grupos","group":"A","dateISO":"2026-06-11","dateBR":"11/06/2026","weekday":"quinta-feira","time":"23:00","flag1":"🇰🇷","team1":"Coreia do Sul","flag2":"🇨🇿","team2":"República Tcheca","stadium":"Estadio Akron","city":"Guadalajara","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":3,"phase":"Fase de Grupos","group":"B","dateISO":"2026-06-12","dateBR":"12/06/2026","weekday":"sexta-feira","time":"16:00","flag1":"🇨🇦","team1":"Canadá","flag2":"🇧🇦","team2":"Bósnia e Herzegovina","stadium":"BMO Field","city":"Toronto","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":4,"phase":"Fase de Grupos","group":"D","dateISO":"2026-06-12","dateBR":"12/06/2026","weekday":"sexta-feira","time":"22:00","flag1":"🇺🇸","team1":"EUA","flag2":"🇵🇾","team2":"Paraguai","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":5,"phase":"Fase de Grupos","group":"C","dateISO":"2026-06-13","dateBR":"13/06/2026","weekday":"sábado","time":"22:00","flag1":"🇭🇹","team1":"Haiti","flag2":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","team2":"Escócia","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":6,"phase":"Fase de Grupos","group":"D","dateISO":"2026-06-14","dateBR":"14/06/2026","weekday":"domingo","time":"01:00","flag1":"🇦🇺","team1":"Austrália","flag2":"🇹🇷","team2":"Turquia","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":7,"phase":"Fase de Grupos","group":"C","dateISO":"2026-06-13","dateBR":"13/06/2026","weekday":"sábado","time":"19:00","flag1":"🇧🇷","team1":"Brasil","flag2":"🇲🇦","team2":"Marrocos","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":8,"phase":"Fase de Grupos","group":"B","dateISO":"2026-06-13","dateBR":"13/06/2026","weekday":"sábado","time":"16:00","flag1":"🇶🇦","team1":"Catar","flag2":"🇨🇭","team2":"Suíça","stadium":"Levi's Stadium","city":"San Francisco Bay Area","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":9,"phase":"Fase de Grupos","group":"E","dateISO":"2026-06-14","dateBR":"14/06/2026","weekday":"domingo","time":"20:00","flag1":"🇨🇮","team1":"Costa do Marfim","flag2":"🇪🇨","team2":"Equador","stadium":"Lincoln Financial Field","city":"Philadelphia","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":10,"phase":"Fase de Grupos","group":"E","dateISO":"2026-06-14","dateBR":"14/06/2026","weekday":"domingo","time":"14:00","flag1":"🇩🇪","team1":"Alemanha","flag2":"🇨🇼","team2":"Curaçao","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":11,"phase":"Fase de Grupos","group":"F","dateISO":"2026-06-14","dateBR":"14/06/2026","weekday":"domingo","time":"17:00","flag1":"🇳🇱","team1":"Países Baixos","flag2":"🇯🇵","team2":"Japão","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":12,"phase":"Fase de Grupos","group":"F","dateISO":"2026-06-14","dateBR":"14/06/2026","weekday":"domingo","time":"23:00","flag1":"🇸🇪","team1":"Suécia","flag2":"🇹🇳","team2":"Tunísia","stadium":"Estadio BBVA","city":"Monterrey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":13,"phase":"Fase de Grupos","group":"H","dateISO":"2026-06-15","dateBR":"15/06/2026","weekday":"segunda-feira","time":"19:00","flag1":"🇸🇦","team1":"Arábia Saudita","flag2":"🇺🇾","team2":"Uruguai","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":14,"phase":"Fase de Grupos","group":"H","dateISO":"2026-06-15","dateBR":"15/06/2026","weekday":"segunda-feira","time":"13:00","flag1":"🇪🇸","team1":"Espanha","flag2":"🇨🇻","team2":"Cabo Verde","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":15,"phase":"Fase de Grupos","group":"G","dateISO":"2026-06-15","dateBR":"15/06/2026","weekday":"segunda-feira","time":"22:00","flag1":"🇮🇷","team1":"Irã","flag2":"🇳🇿","team2":"Nova Zelândia","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":16,"phase":"Fase de Grupos","group":"G","dateISO":"2026-06-15","dateBR":"15/06/2026","weekday":"segunda-feira","time":"16:00","flag1":"🇧🇪","team1":"Bélgica","flag2":"🇪🇬","team2":"Egito","stadium":"Lumen Field","city":"Seattle","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":17,"phase":"Fase de Grupos","group":"I","dateISO":"2026-06-16","dateBR":"16/06/2026","weekday":"terça-feira","time":"16:00","flag1":"🇫🇷","team1":"França","flag2":"🇸🇳","team2":"Senegal","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":18,"phase":"Fase de Grupos","group":"I","dateISO":"2026-06-16","dateBR":"16/06/2026","weekday":"terça-feira","time":"19:00","flag1":"🇮🇶","team1":"Iraque","flag2":"🇳🇴","team2":"Noruega","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":19,"phase":"Fase de Grupos","group":"J","dateISO":"2026-06-16","dateBR":"16/06/2026","weekday":"terça-feira","time":"22:00","flag1":"🇦🇷","team1":"Argentina","flag2":"🇩🇿","team2":"Argélia","stadium":"Arrowhead Stadium","city":"Kansas City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":20,"phase":"Fase de Grupos","group":"J","dateISO":"2026-06-17","dateBR":"17/06/2026","weekday":"quarta-feira","time":"01:00","flag1":"🇦🇹","team1":"Áustria","flag2":"🇯🇴","team2":"Jordânia","stadium":"Levi's Stadium","city":"San Francisco Bay Area","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":21,"phase":"Fase de Grupos","group":"L","dateISO":"2026-06-17","dateBR":"17/06/2026","weekday":"quarta-feira","time":"20:00","flag1":"🇬🇭","team1":"Gana","flag2":"🇵🇦","team2":"Panamá","stadium":"BMO Field","city":"Toronto","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":22,"phase":"Fase de Grupos","group":"L","dateISO":"2026-06-17","dateBR":"17/06/2026","weekday":"quarta-feira","time":"17:00","flag1":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","team1":"Inglaterra","flag2":"🇭🇷","team2":"Croácia","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":23,"phase":"Fase de Grupos","group":"K","dateISO":"2026-06-17","dateBR":"17/06/2026","weekday":"quarta-feira","time":"14:00","flag1":"🇵🇹","team1":"Portugal","flag2":"🇨🇩","team2":"RD Congo","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":24,"phase":"Fase de Grupos","group":"K","dateISO":"2026-06-17","dateBR":"17/06/2026","weekday":"quarta-feira","time":"23:00","flag1":"🇺🇿","team1":"Uzbequistão","flag2":"🇨🇴","team2":"Colômbia","stadium":"Estadio Banorte","city":"Mexico City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":25,"phase":"Fase de Grupos","group":"A","dateISO":"2026-06-18","dateBR":"18/06/2026","weekday":"quinta-feira","time":"13:00","flag1":"🇨🇿","team1":"República Tcheca","flag2":"🇿🇦","team2":"África do Sul","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":26,"phase":"Fase de Grupos","group":"B","dateISO":"2026-06-18","dateBR":"18/06/2026","weekday":"quinta-feira","time":"16:00","flag1":"🇨🇭","team1":"Suíça","flag2":"🇧🇦","team2":"Bósnia e Herzegovina","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":27,"phase":"Fase de Grupos","group":"B","dateISO":"2026-06-18","dateBR":"18/06/2026","weekday":"quinta-feira","time":"19:00","flag1":"🇨🇦","team1":"Canadá","flag2":"🇶🇦","team2":"Catar","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":28,"phase":"Fase de Grupos","group":"A","dateISO":"2026-06-18","dateBR":"18/06/2026","weekday":"quinta-feira","time":"22:00","flag1":"🇲🇽","team1":"México","flag2":"🇰🇷","team2":"Coreia do Sul","stadium":"Estadio Akron","city":"Guadalajara","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":29,"phase":"Fase de Grupos","group":"C","dateISO":"2026-06-19","dateBR":"19/06/2026","weekday":"sexta-feira","time":"22:00","flag1":"🇧🇷","team1":"Brasil","flag2":"🇭🇹","team2":"Haiti","stadium":"Lincoln Financial Field","city":"Philadelphia","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":30,"phase":"Fase de Grupos","group":"C","dateISO":"2026-06-19","dateBR":"19/06/2026","weekday":"sexta-feira","time":"19:00","flag1":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","team1":"Escócia","flag2":"🇲🇦","team2":"Marrocos","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":31,"phase":"Fase de Grupos","group":"D","dateISO":"2026-06-20","dateBR":"20/06/2026","weekday":"sábado","time":"00:00","flag1":"🇹🇷","team1":"Turquia","flag2":"🇵🇾","team2":"Paraguai","stadium":"Levi's Stadium","city":"San Francisco Bay Area","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":32,"phase":"Fase de Grupos","group":"D","dateISO":"2026-06-19","dateBR":"19/06/2026","weekday":"sexta-feira","time":"16:00","flag1":"🇺🇸","team1":"EUA","flag2":"🇦🇺","team2":"Austrália","stadium":"Lumen Field","city":"Seattle","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":33,"phase":"Fase de Grupos","group":"E","dateISO":"2026-06-20","dateBR":"20/06/2026","weekday":"sábado","time":"17:00","flag1":"🇩🇪","team1":"Alemanha","flag2":"🇨🇮","team2":"Costa do Marfim","stadium":"BMO Field","city":"Toronto","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":34,"phase":"Fase de Grupos","group":"E","dateISO":"2026-06-20","dateBR":"20/06/2026","weekday":"sábado","time":"21:00","flag1":"🇪🇨","team1":"Equador","flag2":"🇨🇼","team2":"Curaçao","stadium":"Arrowhead Stadium","city":"Kansas City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":35,"phase":"Fase de Grupos","group":"F","dateISO":"2026-06-20","dateBR":"20/06/2026","weekday":"sábado","time":"14:00","flag1":"🇳🇱","team1":"Países Baixos","flag2":"🇸🇪","team2":"Suécia","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":36,"phase":"Fase de Grupos","group":"F","dateISO":"2026-06-21","dateBR":"21/06/2026","weekday":"domingo","time":"01:00","flag1":"🇹🇳","team1":"Tunísia","flag2":"🇯🇵","team2":"Japão","stadium":"Estadio BBVA","city":"Monterrey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":37,"phase":"Fase de Grupos","group":"H","dateISO":"2026-06-21","dateBR":"21/06/2026","weekday":"domingo","time":"19:00","flag1":"🇺🇾","team1":"Uruguai","flag2":"🇨🇻","team2":"Cabo Verde","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":38,"phase":"Fase de Grupos","group":"H","dateISO":"2026-06-21","dateBR":"21/06/2026","weekday":"domingo","time":"13:00","flag1":"🇪🇸","team1":"Espanha","flag2":"🇸🇦","team2":"Arábia Saudita","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":39,"phase":"Fase de Grupos","group":"G","dateISO":"2026-06-21","dateBR":"21/06/2026","weekday":"domingo","time":"16:00","flag1":"🇧🇪","team1":"Bélgica","flag2":"🇮🇷","team2":"Irã","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":40,"phase":"Fase de Grupos","group":"G","dateISO":"2026-06-21","dateBR":"21/06/2026","weekday":"domingo","time":"22:00","flag1":"🇳🇿","team1":"Nova Zelândia","flag2":"🇪🇬","team2":"Egito","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":41,"phase":"Fase de Grupos","group":"I","dateISO":"2026-06-22","dateBR":"22/06/2026","weekday":"segunda-feira","time":"21:00","flag1":"🇳🇴","team1":"Noruega","flag2":"🇸🇳","team2":"Senegal","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":42,"phase":"Fase de Grupos","group":"I","dateISO":"2026-06-22","dateBR":"22/06/2026","weekday":"segunda-feira","time":"18:00","flag1":"🇫🇷","team1":"França","flag2":"🇮🇶","team2":"Iraque","stadium":"Lincoln Financial Field","city":"Philadelphia","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":43,"phase":"Fase de Grupos","group":"J","dateISO":"2026-06-22","dateBR":"22/06/2026","weekday":"segunda-feira","time":"14:00","flag1":"🇦🇷","team1":"Argentina","flag2":"🇦🇹","team2":"Áustria","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":44,"phase":"Fase de Grupos","group":"J","dateISO":"2026-06-23","dateBR":"23/06/2026","weekday":"terça-feira","time":"00:00","flag1":"🇯🇴","team1":"Jordânia","flag2":"🇩🇿","team2":"Argélia","stadium":"Levi's Stadium","city":"San Francisco Bay Area","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":45,"phase":"Fase de Grupos","group":"L","dateISO":"2026-06-23","dateBR":"23/06/2026","weekday":"terça-feira","time":"17:00","flag1":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","team1":"Inglaterra","flag2":"🇬🇭","team2":"Gana","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":46,"phase":"Fase de Grupos","group":"L","dateISO":"2026-06-23","dateBR":"23/06/2026","weekday":"terça-feira","time":"20:00","flag1":"🇵🇦","team1":"Panamá","flag2":"🇭🇷","team2":"Croácia","stadium":"BMO Field","city":"Toronto","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":47,"phase":"Fase de Grupos","group":"K","dateISO":"2026-06-23","dateBR":"23/06/2026","weekday":"terça-feira","time":"14:00","flag1":"🇵🇹","team1":"Portugal","flag2":"🇺🇿","team2":"Uzbequistão","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":48,"phase":"Fase de Grupos","group":"K","dateISO":"2026-06-23","dateBR":"23/06/2026","weekday":"terça-feira","time":"23:00","flag1":"🇨🇴","team1":"Colômbia","flag2":"🇨🇩","team2":"RD Congo","stadium":"Estadio Akron","city":"Guadalajara","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":49,"phase":"Fase de Grupos","group":"C","dateISO":"2026-06-24","dateBR":"24/06/2026","weekday":"quarta-feira","time":"19:00","flag1":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","team1":"Escócia","flag2":"🇧🇷","team2":"Brasil","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":50,"phase":"Fase de Grupos","group":"C","dateISO":"2026-06-24","dateBR":"24/06/2026","weekday":"quarta-feira","time":"19:00","flag1":"🇲🇦","team1":"Marrocos","flag2":"🇭🇹","team2":"Haiti","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":51,"phase":"Fase de Grupos","group":"B","dateISO":"2026-06-24","dateBR":"24/06/2026","weekday":"quarta-feira","time":"16:00","flag1":"🇨🇭","team1":"Suíça","flag2":"🇨🇦","team2":"Canadá","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":52,"phase":"Fase de Grupos","group":"B","dateISO":"2026-06-24","dateBR":"24/06/2026","weekday":"quarta-feira","time":"16:00","flag1":"🇧🇦","team1":"Bósnia e Herzegovina","flag2":"🇶🇦","team2":"Catar","stadium":"Lumen Field","city":"Seattle","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":53,"phase":"Fase de Grupos","group":"A","dateISO":"2026-06-24","dateBR":"24/06/2026","weekday":"quarta-feira","time":"22:00","flag1":"🇨🇿","team1":"República Tcheca","flag2":"🇲🇽","team2":"México","stadium":"Estadio Banorte","city":"Mexico City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":54,"phase":"Fase de Grupos","group":"A","dateISO":"2026-06-24","dateBR":"24/06/2026","weekday":"quarta-feira","time":"22:00","flag1":"🇿🇦","team1":"África do Sul","flag2":"🇰🇷","team2":"Coreia do Sul","stadium":"Estadio BBVA","city":"Monterrey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":55,"phase":"Fase de Grupos","group":"E","dateISO":"2026-06-25","dateBR":"25/06/2026","weekday":"quinta-feira","time":"17:00","flag1":"🇨🇼","team1":"Curaçao","flag2":"🇨🇮","team2":"Costa do Marfim","stadium":"Lincoln Financial Field","city":"Philadelphia","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":56,"phase":"Fase de Grupos","group":"E","dateISO":"2026-06-25","dateBR":"25/06/2026","weekday":"quinta-feira","time":"17:00","flag1":"🇪🇨","team1":"Equador","flag2":"🇩🇪","team2":"Alemanha","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":57,"phase":"Fase de Grupos","group":"F","dateISO":"2026-06-25","dateBR":"25/06/2026","weekday":"quinta-feira","time":"20:00","flag1":"🇯🇵","team1":"Japão","flag2":"🇸🇪","team2":"Suécia","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":58,"phase":"Fase de Grupos","group":"F","dateISO":"2026-06-25","dateBR":"25/06/2026","weekday":"quinta-feira","time":"20:00","flag1":"🇹🇳","team1":"Tunísia","flag2":"🇳🇱","team2":"Países Baixos","stadium":"Arrowhead Stadium","city":"Kansas City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":59,"phase":"Fase de Grupos","group":"D","dateISO":"2026-06-25","dateBR":"25/06/2026","weekday":"quinta-feira","time":"23:00","flag1":"🇹🇷","team1":"Turquia","flag2":"🇺🇸","team2":"EUA","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":60,"phase":"Fase de Grupos","group":"D","dateISO":"2026-06-25","dateBR":"25/06/2026","weekday":"quinta-feira","time":"23:00","flag1":"🇵🇾","team1":"Paraguai","flag2":"🇦🇺","team2":"Austrália","stadium":"Levi's Stadium","city":"San Francisco Bay Area","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":61,"phase":"Fase de Grupos","group":"I","dateISO":"2026-06-26","dateBR":"26/06/2026","weekday":"sexta-feira","time":"16:00","flag1":"🇳🇴","team1":"Noruega","flag2":"🇫🇷","team2":"França","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":62,"phase":"Fase de Grupos","group":"I","dateISO":"2026-06-26","dateBR":"26/06/2026","weekday":"sexta-feira","time":"16:00","flag1":"🇸🇳","team1":"Senegal","flag2":"🇮🇶","team2":"Iraque","stadium":"BMO Field","city":"Toronto","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":63,"phase":"Fase de Grupos","group":"G","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"00:00","flag1":"🇪🇬","team1":"Egito","flag2":"🇮🇷","team2":"Irã","stadium":"Lumen Field","city":"Seattle","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":64,"phase":"Fase de Grupos","group":"G","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"00:00","flag1":"🇳🇿","team1":"Nova Zelândia","flag2":"🇧🇪","team2":"Bélgica","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":65,"phase":"Fase de Grupos","group":"H","dateISO":"2026-06-26","dateBR":"26/06/2026","weekday":"sexta-feira","time":"21:00","flag1":"🇨🇻","team1":"Cabo Verde","flag2":"🇸🇦","team2":"Arábia Saudita","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":66,"phase":"Fase de Grupos","group":"H","dateISO":"2026-06-26","dateBR":"26/06/2026","weekday":"sexta-feira","time":"21:00","flag1":"🇺🇾","team1":"Uruguai","flag2":"🇪🇸","team2":"Espanha","stadium":"Estadio Akron","city":"Guadalajara","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":67,"phase":"Fase de Grupos","group":"L","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"18:00","flag1":"🇵🇦","team1":"Panamá","flag2":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","team2":"Inglaterra","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":68,"phase":"Fase de Grupos","group":"L","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"18:00","flag1":"🇭🇷","team1":"Croácia","flag2":"🇬🇭","team2":"Gana","stadium":"Lincoln Financial Field","city":"Philadelphia","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":69,"phase":"Fase de Grupos","group":"J","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"23:00","flag1":"🇩🇿","team1":"Argélia","flag2":"🇦🇹","team2":"Áustria","stadium":"Arrowhead Stadium","city":"Kansas City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":70,"phase":"Fase de Grupos","group":"J","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"23:00","flag1":"🇯🇴","team1":"Jordânia","flag2":"🇦🇷","team2":"Argentina","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":71,"phase":"Fase de Grupos","group":"K","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"20:30","flag1":"🇨🇴","team1":"Colômbia","flag2":"🇵🇹","team2":"Portugal","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":72,"phase":"Fase de Grupos","group":"K","dateISO":"2026-06-27","dateBR":"27/06/2026","weekday":"sábado","time":"20:30","flag1":"🇨🇩","team1":"RD Congo","flag2":"🇺🇿","team2":"Uzbequistão","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":73,"phase":"16 avos de final","group":"","dateISO":"2026-06-28","dateBR":"28/06/2026","weekday":"domingo","time":"16:00","flag1":"🏳️","team1":"Vice Grupo A","flag2":"🏳️","team2":"Vice Grupo B","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":74,"phase":"16 avos de final","group":"","dateISO":"2026-06-29","dateBR":"29/06/2026","weekday":"segunda-feira","time":"17:30","flag1":"🏳️","team1":"Vencedor Grupo E","flag2":"🏳️","team2":"3º Grupo A/B/C/D/F","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":75,"phase":"16 avos de final","group":"","dateISO":"2026-06-29","dateBR":"29/06/2026","weekday":"segunda-feira","time":"22:00","flag1":"🏳️","team1":"Vencedor Grupo F","flag2":"🏳️","team2":"Vice Grupo C","stadium":"Estadio BBVA","city":"Monterrey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":76,"phase":"16 avos de final","group":"","dateISO":"2026-06-29","dateBR":"29/06/2026","weekday":"segunda-feira","time":"14:00","flag1":"🏳️","team1":"Vencedor Grupo C","flag2":"🏳️","team2":"Vice Grupo F","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":77,"phase":"16 avos de final","group":"","dateISO":"2026-06-30","dateBR":"30/06/2026","weekday":"terça-feira","time":"18:00","flag1":"🏳️","team1":"Vencedor Grupo I","flag2":"🏳️","team2":"3º Grupo C/D/F/G/H","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":78,"phase":"16 avos de final","group":"","dateISO":"2026-06-30","dateBR":"30/06/2026","weekday":"terça-feira","time":"14:00","flag1":"🏳️","team1":"Vice Grupo E","flag2":"🏳️","team2":"Vice Grupo I","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":79,"phase":"16 avos de final","group":"","dateISO":"2026-06-30","dateBR":"30/06/2026","weekday":"terça-feira","time":"22:00","flag1":"🏳️","team1":"Vencedor Grupo A","flag2":"🏳️","team2":"3º Grupo C/E/F/H/I","stadium":"Estadio Banorte","city":"Mexico City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":80,"phase":"16 avos de final","group":"","dateISO":"2026-07-01","dateBR":"01/07/2026","weekday":"quarta-feira","time":"13:00","flag1":"🏳️","team1":"Vencedor Grupo L","flag2":"🏳️","team2":"3º Grupo E/H/I/J/K","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":81,"phase":"16 avos de final","group":"","dateISO":"2026-07-01","dateBR":"01/07/2026","weekday":"quarta-feira","time":"21:00","flag1":"🏳️","team1":"Vencedor Grupo D","flag2":"🏳️","team2":"3º Grupo B/E/F/I/J","stadium":"Levi's Stadium","city":"San Francisco Bay Area","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":82,"phase":"16 avos de final","group":"","dateISO":"2026-07-01","dateBR":"01/07/2026","weekday":"quarta-feira","time":"17:00","flag1":"🏳️","team1":"Vencedor Grupo G","flag2":"🏳️","team2":"3º Grupo A/E/H/I/J","stadium":"Lumen Field","city":"Seattle","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":83,"phase":"16 avos de final","group":"","dateISO":"2026-07-02","dateBR":"02/07/2026","weekday":"quinta-feira","time":"20:00","flag1":"🏳️","team1":"Vice Grupo K","flag2":"🏳️","team2":"Vice Grupo L","stadium":"BMO Field","city":"Toronto","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":84,"phase":"16 avos de final","group":"","dateISO":"2026-07-02","dateBR":"02/07/2026","weekday":"quinta-feira","time":"16:00","flag1":"🏳️","team1":"Vencedor Grupo H","flag2":"🏳️","team2":"Vice Grupo J","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":85,"phase":"16 avos de final","group":"","dateISO":"2026-07-03","dateBR":"03/07/2026","weekday":"sexta-feira","time":"00:00","flag1":"🏳️","team1":"Vencedor Grupo B","flag2":"🏳️","team2":"3º Grupo E/F/G/I/J","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":86,"phase":"16 avos de final","group":"","dateISO":"2026-07-03","dateBR":"03/07/2026","weekday":"sexta-feira","time":"19:00","flag1":"🏳️","team1":"Vencedor Grupo J","flag2":"🏳️","team2":"Vice Grupo H","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":87,"phase":"16 avos de final","group":"","dateISO":"2026-07-03","dateBR":"03/07/2026","weekday":"sexta-feira","time":"22:30","flag1":"🏳️","team1":"Vencedor Grupo K","flag2":"🏳️","team2":"3º Grupo D/E/I/J/L","stadium":"Arrowhead Stadium","city":"Kansas City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":88,"phase":"16 avos de final","group":"","dateISO":"2026-07-03","dateBR":"03/07/2026","weekday":"sexta-feira","time":"15:00","flag1":"🏳️","team1":"Vice Grupo D","flag2":"🏳️","team2":"Vice Grupo G","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":89,"phase":"Oitavas de final","group":"","dateISO":"2026-07-04","dateBR":"04/07/2026","weekday":"sábado","time":"18:00","flag1":"🏳️","team1":"Vencedor Jogo 74","flag2":"🏳️","team2":"Vencedor Jogo 77","stadium":"Lincoln Financial Field","city":"Philadelphia","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":90,"phase":"Oitavas de final","group":"","dateISO":"2026-07-04","dateBR":"04/07/2026","weekday":"sábado","time":"14:00","flag1":"🏳️","team1":"Vencedor Jogo 73","flag2":"🏳️","team2":"Vencedor Jogo 75","stadium":"NRG Stadium","city":"Houston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":91,"phase":"Oitavas de final","group":"","dateISO":"2026-07-05","dateBR":"05/07/2026","weekday":"domingo","time":"17:00","flag1":"🏳️","team1":"Vencedor Jogo 76","flag2":"🏳️","team2":"Vencedor Jogo 78","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":92,"phase":"Oitavas de final","group":"","dateISO":"2026-07-05","dateBR":"05/07/2026","weekday":"domingo","time":"21:00","flag1":"🏳️","team1":"Vencedor Jogo 79","flag2":"🏳️","team2":"Vencedor Jogo 80","stadium":"Estadio Banorte","city":"Mexico City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":93,"phase":"Oitavas de final","group":"","dateISO":"2026-07-06","dateBR":"06/07/2026","weekday":"segunda-feira","time":"16:00","flag1":"🏳️","team1":"Vencedor Jogo 83","flag2":"🏳️","team2":"Vencedor Jogo 84","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":94,"phase":"Oitavas de final","group":"","dateISO":"2026-07-06","dateBR":"06/07/2026","weekday":"segunda-feira","time":"21:00","flag1":"🏳️","team1":"Vencedor Jogo 81","flag2":"🏳️","team2":"Vencedor Jogo 82","stadium":"Lumen Field","city":"Seattle","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":95,"phase":"Oitavas de final","group":"","dateISO":"2026-07-07","dateBR":"07/07/2026","weekday":"terça-feira","time":"13:00","flag1":"🏳️","team1":"Vencedor Jogo 86","flag2":"🏳️","team2":"Vencedor Jogo 88","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":96,"phase":"Oitavas de final","group":"","dateISO":"2026-07-07","dateBR":"07/07/2026","weekday":"terça-feira","time":"17:00","flag1":"🏳️","team1":"Vencedor Jogo 85","flag2":"🏳️","team2":"Vencedor Jogo 87","stadium":"BC Place","city":"Vancouver","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":97,"phase":"Quartas de final","group":"","dateISO":"2026-07-09","dateBR":"09/07/2026","weekday":"quinta-feira","time":"17:00","flag1":"🏳️","team1":"Vencedor Jogo 89","flag2":"🏳️","team2":"Vencedor Jogo 90","stadium":"Gillette Stadium","city":"Boston","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":98,"phase":"Quartas de final","group":"","dateISO":"2026-07-10","dateBR":"10/07/2026","weekday":"sexta-feira","time":"16:00","flag1":"🏳️","team1":"Vencedor Jogo 93","flag2":"🏳️","team2":"Vencedor Jogo 94","stadium":"SoFi Stadium","city":"Los Angeles","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":99,"phase":"Quartas de final","group":"","dateISO":"2026-07-11","dateBR":"11/07/2026","weekday":"sábado","time":"18:00","flag1":"🏳️","team1":"Vencedor Jogo 91","flag2":"🏳️","team2":"Vencedor Jogo 92","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":100,"phase":"Quartas de final","group":"","dateISO":"2026-07-11","dateBR":"11/07/2026","weekday":"sábado","time":"22:00","flag1":"🏳️","team1":"Vencedor Jogo 95","flag2":"🏳️","team2":"Vencedor Jogo 96","stadium":"Arrowhead Stadium","city":"Kansas City","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":101,"phase":"Semifinal","group":"","dateISO":"2026-07-14","dateBR":"14/07/2026","weekday":"terça-feira","time":"16:00","flag1":"🏳️","team1":"Vencedor Jogo 97","flag2":"🏳️","team2":"Vencedor Jogo 98","stadium":"AT&T Stadium","city":"Dallas","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":102,"phase":"Semifinal","group":"","dateISO":"2026-07-15","dateBR":"15/07/2026","weekday":"quarta-feira","time":"16:00","flag1":"🏳️","team1":"Vencedor Jogo 99","flag2":"🏳️","team2":"Vencedor Jogo 100","stadium":"Mercedes-Benz Stadium","city":"Atlanta","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":103,"phase":"Disputa de 3º lugar","group":"","dateISO":"2026-07-18","dateBR":"18/07/2026","weekday":"sábado","time":"18:00","flag1":"🏳️","team1":"Perdedor Jogo 101","flag2":"🏳️","team2":"Perdedor Jogo 102","stadium":"Hard Rock Stadium","city":"Miami","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"},{"id":104,"phase":"Final","group":"","dateISO":"2026-07-19","dateBR":"19/07/2026","weekday":"domingo","time":"16:00","flag1":"🏳️","team1":"Vencedor Jogo 101","flag2":"🏳️","team2":"Vencedor Jogo 102","stadium":"MetLife Stadium","city":"New York/New Jersey","source":"https://www.roadtrips.com/world-cup/2026-world-cup-packages/schedule/"}];
+const STORAGE_KEY = 'copa2026-resultados-v1';
+const groups = [...new Set(GAMES.filter(g => g.group).map(g => g.group))].sort();
+const phases = [...new Set(GAMES.map(g => g.phase))];
+let currentGroup = 'A';
+let selectedCalendarDate = '2026-06-11';
+let results = loadResults();
+let deferredPrompt = null;
+
+function loadResults() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
+function saveResults() { localStorage.setItem(STORAGE_KEY, JSON.stringify(results)); }
+function num(v) { const n = Number(v); return Number.isFinite(n) && v !== '' && v !== null ? n : null; }
+function getScore(id) {
+  const r = results[id] || {};
+  return { g1: num(r.g1), g2: num(r.g2) };
+}
+function hasScore(g) { const s = getScore(g.id); return s.g1 !== null && s.g2 !== null; }
+function resultTotal(g) { const s = getScore(g.id); return s.g1 !== null && s.g2 !== null ? s.g1 + s.g2 : null; }
+function winner(g) {
+  const s = getScore(g.id);
+  if (s.g1 === null || s.g2 === null) return '';
+  if (s.g1 > s.g2) return g.team1;
+  if (s.g2 > s.g1) return g.team2;
+  return 'Empate';
+}
+function escapeHtml(text) {
+  return String(text ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+function scoreInputs(g) {
+  const s = getScore(g.id);
+  return `<input class="scoreInput" inputmode="numeric" type="number" min="0" max="99" value="${s.g1 ?? ''}" data-id="${g.id}" data-side="g1" aria-label="Gols de ${escapeHtml(g.team1)}">` +
+         `<span class="vs">x</span>` +
+         `<input class="scoreInput" inputmode="numeric" type="number" min="0" max="99" value="${s.g2 ?? ''}" data-id="${g.id}" data-side="g2" aria-label="Gols de ${escapeHtml(g.team2)}">`;
+}
+function matchRow(g) {
+  const total = resultTotal(g);
+  return `<tr>
+    <td class="center"><b>${g.id}</b></td>
+    <td><span class="pill">${escapeHtml(g.phase)}</span></td>
+    <td class="center">${escapeHtml(g.group || '-')}</td>
+    <td>${escapeHtml(g.weekday)}<br><b>${g.dateBR}</b></td>
+    <td class="center"><b>${escapeHtml(g.time)}</b></td>
+    <td><div class="matchTeams"><span class="team">${g.flag1} ${escapeHtml(g.team1)}</span><span class="vs">vs</span><span class="team right">${escapeHtml(g.team2)} ${g.flag2}</span></div></td>
+    <td class="center">${scoreInputs(g)}</td>
+    <td class="center">${total ?? '-'}</td>
+    <td>${escapeHtml(winner(g) || '-')}</td>
+    <td>${escapeHtml(g.stadium)}<br><span class="hint">${escapeHtml(g.city)}</span></td>
+  </tr>`;
+}
+function matchCard(g) {
+  return `<div class="matchCard">
+    <div class="matchMeta"><span>Jogo ${g.id} · ${escapeHtml(g.phase)} ${g.group ? '· Grupo ' + escapeHtml(g.group) : ''}</span><span>${escapeHtml(g.weekday)}, ${g.dateBR} · ${escapeHtml(g.time)}</span></div>
+    <div class="matchLine">
+      <div class="team">${g.flag1} <span>${escapeHtml(g.team1)}</span></div>
+      ${scoreInputs(g)}
+      <div class="team right"><span>${escapeHtml(g.team2)}</span> ${g.flag2}</div>
+    </div>
+    <div class="footerNote">${escapeHtml(g.stadium)} · ${escapeHtml(g.city)}</div>
+  </div>`;
+}
+function attachScoreEvents(root=document) {
+  root.querySelectorAll('.scoreInput').forEach(input => {
+    input.addEventListener('input', e => {
+      const id = e.target.dataset.id;
+      const side = e.target.dataset.side;
+      if (!results[id]) results[id] = {};
+      const value = e.target.value;
+      if (value === '') delete results[id][side];
+      else results[id][side] = Math.max(0, parseInt(value, 10) || 0);
+      if (Object.keys(results[id]).length === 0) delete results[id];
+      saveResults();
+      renderAll(false);
+    });
+  });
+}
+function calcStats() {
+  const completed = GAMES.filter(hasScore);
+  const totalGoals = completed.reduce((sum, g) => sum + resultTotal(g), 0);
+  const teams = {};
+  const blowouts = [];
+  for (const g of completed) {
+    const s = getScore(g.id);
+    teams[g.team1] ??= {team:g.team1, flag:g.flag1, goals:0, conceded:0, games:0};
+    teams[g.team2] ??= {team:g.team2, flag:g.flag2, goals:0, conceded:0, games:0};
+    teams[g.team1].goals += s.g1; teams[g.team1].conceded += s.g2; teams[g.team1].games++;
+    teams[g.team2].goals += s.g2; teams[g.team2].conceded += s.g1; teams[g.team2].games++;
+    if (s.g1 >= 4) blowouts.push({game:g, team:g.team1, flag:g.flag1, goals:s.g1, against:g.team2, score:`${s.g1} x ${s.g2}`});
+    if (s.g2 >= 4) blowouts.push({game:g, team:g.team2, flag:g.flag2, goals:s.g2, against:g.team1, score:`${s.g2} x ${s.g1}`});
+  }
+  const teamList = Object.values(teams).sort((a,b) => b.goals - a.goals || (b.goals-b.conceded)-(a.goals-a.conceded) || a.team.localeCompare(b.team));
+  const top = teamList[0] || null;
+  const lines = [0.5,1.5,2.5,3.5,4.5,5.5,6.5,7.5].map(line => ({line, count: completed.filter(g => resultTotal(g) > line).length}));
+  return {completed, totalGoals, avg: completed.length ? totalGoals / completed.length : 0, teamList, top, lines, blowouts};
+}
+function calcGroupStandings(group) {
+  const matches = GAMES.filter(g => g.group === group && g.phase === 'Fase de Grupos');
+  const map = {};
+  for (const g of matches) {
+    for (const [team,flag] of [[g.team1,g.flag1],[g.team2,g.flag2]]) {
+      map[team] ??= {team, flag, J:0,V:0,E:0,D:0,GF:0,GC:0,SG:0,P:0};
+    }
+    if (!hasScore(g)) continue;
+    const s = getScore(g.id);
+    const a = map[g.team1], b = map[g.team2];
+    a.J++; b.J++;
+    a.GF += s.g1; a.GC += s.g2; b.GF += s.g2; b.GC += s.g1;
+    if (s.g1 > s.g2) { a.V++; a.P += 3; b.D++; }
+    else if (s.g2 > s.g1) { b.V++; b.P += 3; a.D++; }
+    else { a.E++; b.E++; a.P++; b.P++; }
+  }
+  Object.values(map).forEach(t => t.SG = t.GF - t.GC);
+  return Object.values(map).sort((a,b) => b.P-a.P || b.SG-a.SG || b.GF-a.GF || a.team.localeCompare(b.team));
+}
+function renderHome() {
+  const upcoming = GAMES.slice(0, 8);
+  document.getElementById('nextCards').innerHTML = upcoming.map(matchCard).join('');
+  document.querySelectorAll('.jumpTab').forEach(btn => btn.addEventListener('click', () => openTab(btn.dataset.target)));
+}
+function openTab(tabName) {
+  const tab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+  const panel = document.getElementById(tabName);
+  if (!tab || !panel) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  tab.classList.add('active');
+  panel.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function gamesByDate() {
+  return GAMES.reduce((acc, g) => {
+    (acc[g.dateISO] ||= []).push(g);
+    return acc;
+  }, {});
+}
+function monthName(year, monthIndex) {
+  return new Intl.DateTimeFormat('pt-BR', {month:'long', year:'numeric'}).format(new Date(year, monthIndex, 1));
+}
+function buildCalendarMonth(year, monthIndex) {
+  const byDate = gamesByDate();
+  const first = new Date(year, monthIndex, 1);
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+  const blanks = first.getDay();
+  const weekDays = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  let cells = '';
+  for (let i = 0; i < blanks; i++) cells += '<div class="dayBlank" aria-hidden="true"></div>';
+  for (let day = 1; day <= lastDay; day++) {
+    const iso = `${year}-${String(monthIndex + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const games = byDate[iso] || [];
+    const hasGames = games.length > 0;
+    const selected = iso === selectedCalendarDate ? 'selected' : '';
+    const times = games.slice(0,4).map(g => g.time).join(' • ');
+    cells += `<button class="dayCell ${hasGames ? 'hasGames' : 'noGames'} ${selected}" data-date="${iso}" ${hasGames ? '' : 'tabindex="-1"'}>
+      <span class="dayNum">${day}</span>
+      ${hasGames ? `<span class="gameBadge">${games.length} ${games.length === 1 ? 'jogo' : 'jogos'}</span><span class="miniTimes">${escapeHtml(times)}</span>` : ''}
+    </button>`;
+  }
+  return `<div class="calendarMonth">
+    <div class="calendarHead"><h3>${escapeHtml(monthName(year, monthIndex))}</h3><span>Horário de Brasília</span></div>
+    <div class="weekGrid">${weekDays.map(d => `<div>${d}</div>`).join('')}</div>
+    <div class="daysGrid">${cells}</div>
+  </div>`;
+}
+function renderCalendar() {
+  document.getElementById('calendarWrap').innerHTML = buildCalendarMonth(2026, 5) + buildCalendarMonth(2026, 6);
+  document.querySelectorAll('.dayCell.hasGames').forEach(btn => btn.addEventListener('click', () => {
+    selectedCalendarDate = btn.dataset.date;
+    renderCalendar();
+    attachScoreEvents(document.getElementById('calendarDayGames'));
+  }));
+  renderCalendarDayGames();
+}
+function renderCalendarDayGames() {
+  const list = GAMES.filter(g => g.dateISO === selectedCalendarDate).sort((a,b) => a.time.localeCompare(b.time));
+  const titleGame = list[0];
+  const title = titleGame ? `${escapeHtml(titleGame.weekday)}, ${escapeHtml(titleGame.dateBR)}` : selectedCalendarDate;
+  document.getElementById('calendarDayGames').innerHTML = `<div class="dayGamesTitle"><h3>${title}</h3><span class="pill">${list.length} ${list.length === 1 ? 'jogo' : 'jogos'}</span></div>` +
+    (list.length ? `<div class="cards">${list.map(matchCard).join('')}</div>` : '<div class="empty">Nenhum jogo neste dia.</div>');
+}
+function renderGroups() {
+  document.getElementById('groupButtons').innerHTML = groups.map(g => `<button class="groupBtn ${g===currentGroup?'active':''}" data-group="${g}">Grupo ${g}</button>`).join('');
+  document.querySelectorAll('.groupBtn').forEach(btn => btn.addEventListener('click', () => { currentGroup = btn.dataset.group; renderGroups(); attachScoreEvents(document.getElementById('groupContent')); }));
+  const standings = calcGroupStandings(currentGroup);
+  const matches = GAMES.filter(g => g.group === currentGroup && g.phase === 'Fase de Grupos');
+  const standingsRows = standings.map((t, i) => `<tr><td class="center"><b>${i+1}</b></td><td>${t.flag} <b>${escapeHtml(t.team)}</b></td><td class="center">${t.P}</td><td class="center">${t.J}</td><td class="center">${t.V}</td><td class="center">${t.E}</td><td class="center">${t.D}</td><td class="center">${t.GF}</td><td class="center">${t.GC}</td><td class="center">${t.SG}</td></tr>`).join('');
+  document.getElementById('groupContent').innerHTML = `<div class="sectionTitle"><h2>Grupo ${currentGroup}</h2><span class="hint">P, J, V, E, D, GF, GC, SG</span></div>
+    <div class="tableWrap"><table><thead><tr><th>#</th><th>Seleção</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GF</th><th>GC</th><th>SG</th></tr></thead><tbody>${standingsRows}</tbody></table></div>
+    <div class="sectionTitle" style="margin-top:18px"><h2>Jogos do Grupo ${currentGroup}</h2></div>
+    <div class="cards">${matches.map(matchCard).join('')}</div>`;
+}
+function renderTodos() {
+  const q = document.getElementById('searchAll').value.trim().toLowerCase();
+  const phase = document.getElementById('phaseFilter').value;
+  const group = document.getElementById('groupFilter').value;
+  const list = GAMES.filter(g => (!phase || g.phase === phase) && (!group || g.group === group) && (!q || [g.team1,g.team2,g.phase,g.group,g.stadium,g.city,g.dateBR,g.weekday].join(' ').toLowerCase().includes(q)));
+  const head = '<thead><tr><th>Jogo</th><th>Fase</th><th>Grupo</th><th>Data</th><th>Hora</th><th>Confronto</th><th>Resultado</th><th>Total</th><th>Vencedor</th><th>Local</th></tr></thead>';
+  document.getElementById('allTable').innerHTML = head + `<tbody>${list.map(matchRow).join('') || '<tr><td colspan="10" class="empty">Nenhum jogo encontrado.</td></tr>'}</tbody>`;
+}
+function renderKnockout() {
+  const list = GAMES.filter(g => g.phase !== 'Fase de Grupos');
+  const head = '<thead><tr><th>Jogo</th><th>Fase</th><th>Data</th><th>Hora</th><th>Confronto</th><th>Resultado</th><th>Total</th><th>Vencedor</th><th>Local</th></tr></thead>';
+  document.getElementById('knockoutTable').innerHTML = head + `<tbody>${list.map(g => `<tr><td class="center"><b>${g.id}</b></td><td>${escapeHtml(g.phase)}</td><td>${escapeHtml(g.weekday)}<br><b>${g.dateBR}</b></td><td class="center"><b>${escapeHtml(g.time)}</b></td><td><div class="matchTeams"><span class="team">${g.flag1} ${escapeHtml(g.team1)}</span><span class="vs">vs</span><span class="team right">${escapeHtml(g.team2)} ${g.flag2}</span></div></td><td class="center">${scoreInputs(g)}</td><td class="center">${resultTotal(g) ?? '-'}</td><td>${escapeHtml(winner(g) || '-')}</td><td>${escapeHtml(g.stadium)}<br><span class="hint">${escapeHtml(g.city)}</span></td></tr>`).join('')}</tbody>`;
+}
+function renderStats() {
+  const st = calcStats();
+  document.getElementById('statsKpis').innerHTML = [
+    ['Jogos preenchidos', st.completed.length], ['Total de gols', st.totalGoals], ['Média de gols', st.avg.toFixed(2)], ['Time com mais gols', st.top ? `${st.top.flag} ${escapeHtml(st.top.team)} (${st.top.goals})` : '-'], ['Goleadas', st.blowouts.length]
+  ].map(([label,value]) => `<div class="card kpi"><div class="label">${label}</div><div class="value" style="font-size:${String(value).length>14?'20px':'28px'}">${value}</div></div>`).join('');
+  document.getElementById('goalsLines').innerHTML = st.lines.map(x => `<div class="card kpi"><div class="label">Gols acima de ${x.line}</div><div class="value">${x.count}</div></div>`).join('');
+  document.getElementById('teamGoalsTable').innerHTML = '<thead><tr><th>#</th><th>Seleção</th><th>Jogos</th><th>Gols feitos</th><th>Gols sofridos</th><th>Saldo</th></tr></thead><tbody>' + (st.teamList.map((t,i) => `<tr><td class="center"><b>${i+1}</b></td><td>${t.flag} <b>${escapeHtml(t.team)}</b></td><td class="center">${t.games}</td><td class="center">${t.goals}</td><td class="center">${t.conceded}</td><td class="center">${t.goals-t.conceded}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Preencha resultados para gerar o ranking.</td></tr>') + '</tbody>';
+  document.getElementById('blowoutsTable').innerHTML = '<thead><tr><th>Jogo</th><th>Data</th><th>Seleção</th><th>Placar</th><th>Adversário</th><th>Fase</th></tr></thead><tbody>' + (st.blowouts.map(b => `<tr><td class="center"><b>${b.game.id}</b></td><td>${b.game.dateBR}</td><td>${b.flag} <b>${escapeHtml(b.team)}</b></td><td class="center"><b>${b.score}</b></td><td>${escapeHtml(b.against)}</td><td>${escapeHtml(b.game.phase)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Nenhuma goleada registrada.</td></tr>') + '</tbody>';
+}
+function populateFilters() {
+  document.getElementById('phaseFilter').innerHTML = '<option value="">Todas as fases</option>' + phases.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+  document.getElementById('groupFilter').innerHTML = '<option value="">Todos os grupos</option>' + groups.map(g => `<option value="${g}">Grupo ${g}</option>`).join('');
+}
+function renderAll(rebind=true) {
+  renderHome(); renderCalendar(); renderGroups(); renderTodos(); renderKnockout(); renderStats();
+  if (rebind) attachScoreEvents(); else attachScoreEvents();
+}
+
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => openTab(tab.dataset.tab)));
+document.getElementById('searchAll').addEventListener('input', () => { renderTodos(); attachScoreEvents(document.getElementById('allTable')); });
+document.getElementById('phaseFilter').addEventListener('change', () => { renderTodos(); attachScoreEvents(document.getElementById('allTable')); });
+document.getElementById('groupFilter').addEventListener('change', () => { renderTodos(); attachScoreEvents(document.getElementById('allTable')); });
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (confirm('Tem certeza que deseja apagar todos os resultados lançados?')) { results = {}; saveResults(); renderAll(); }
+});
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({exportadoEm:new Date().toISOString(), resultados: results}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'resultados-copa-2026.json'; a.click(); URL.revokeObjectURL(a.href);
+});
+document.getElementById('importFile').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try { const data = JSON.parse(reader.result); results = data.resultados || data || {}; saveResults(); renderAll(); alert('Resultados importados com sucesso.'); }
+    catch { alert('Arquivo inválido.'); }
+  };
+  reader.readAsText(file);
+});
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display = 'inline-flex';
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('installBtn').style.display = 'none';
+});
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('service-worker.js').catch(() => {});
+}
+populateFilters();
+renderAll();
+</script>
+</body>
+</html>
